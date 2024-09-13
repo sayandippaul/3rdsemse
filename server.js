@@ -59,9 +59,10 @@ const mongoose = require('mongoose');
 
 // Middleware
 // previous url='mongodb+srv://bidisha:0420@bidishaproject.rgyjmyb.mongodb.net/?retryWrites=true&w=majority&appName=bidishaproject'
+
 app.use(bodyParser.json());
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/doctor', {
+mongoose.connect('mongodb+srv://sayandip:sayandip2003@dropling.beoaja8.mongodb.net/?retryWrites=true&w=majority&appName=medai', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
