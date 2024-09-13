@@ -58,9 +58,10 @@ const mongoose = require('mongoose');
 
 
 // Middleware
+// previous url='mongodb+srv://bidisha:0420@bidishaproject.rgyjmyb.mongodb.net/?retryWrites=true&w=majority&appName=bidishaproject'
 app.use(bodyParser.json());
 // Connect to MongoDB
-mongoose.connect('mongodb+srv://bidisha:0420@bidishaproject.rgyjmyb.mongodb.net/?retryWrites=true&w=majority&appName=bidishaproject', {
+mongoose.connect('mongodb://localhost:27017/doctor', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
@@ -74,20 +75,17 @@ db.once('open', () => {
 // Define a simple schema and model
 const players = new mongoose.Schema({
   name: String,
-  ghuti: String,
-  ladder:Number,
-  snake:Number,
-  position:Number,
-  dan:Number,
-  approved:Number,
+  catagory: String,
+  password:Number,
+  gmail:String,
 });
 
-const Data = mongoose.model('players', players);
+const Data = mongoose.model('users', players);
 
 // Routes
 app.post('/saveplayers', async (req, res) => {
   var newData = new Data(req.body);
-  // console.log(newData);
+  console.log(newData);
   try {
     const savedData = await newData.save();
     res.status(201).json(savedData);
@@ -110,7 +108,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Serve the index.html file for the root URL
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});app.get('/gamepage', (req, res) => {
+});
+app.get('/gamepage', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'game.html'));
 });
 
@@ -151,6 +150,8 @@ usp.on("connection", async function (socket) {
 
 
 
+
+
   socket.on("gameended", async(arg) => {
     console.log("game ended"); // world
     var v = await Data.deleteMany();
@@ -174,6 +175,59 @@ usp.on("connection", async function (socket) {
   });
 
 
+  socket.on("doctor", async(arg) => {
+
+    console.log("APPOINT DOCTOR"); // world
+    // console.log(arg);
+    // socket.broadcast.emit('showusereneterd', {name:arg.name,ghuti:arg.ghuti});
+    // socket.emit('showusereneterd', {name:arg.name,ghuti:arg.ghuti});
+ socket.broadcast.emit('newpatient',arg);
+    // socket.emit('playsound',arg);
+    // socket.emit('showposition', arg);
+ console.log(arg);
+    var nodemailer = require("nodemailer");
+    var transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "sayandip31072003@gmail.com",
+        pass: "ovcvjfosjxcyenyh",
+      },
+    });
+    var mailOptions = {
+      from: "sayandip31072003@gmail.com",
+      to: arg.email,
+      subject: "Subject",
+
+      html:
+        `<div>
+            <h1>Hello ` +
+        arg.name +
+        `,</h1>
+            <p>New Patient Admission Has been done. In emergency cases Kindly Scan Qr Code.</p>
+            <p>Details : `+arg.details+` </p>`,
+      attachments: [
+        {
+          filename: "QR.jpeg",
+          path: "public/pictures/qr.png",
+        },
+      ],
+    };
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log("Email sent: " + info.response);
+        //   break;
+        // do something useful
+      }
+    });
+
+
+
+  });
+
+
+
 
   socket.on("disconnect", async function () {
     console.log("user disconnected");
@@ -181,8 +235,7 @@ usp.on("connection", async function (socket) {
     });
 
 
-    
-    
+   
     
   
 
